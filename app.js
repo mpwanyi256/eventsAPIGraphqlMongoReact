@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const { graphqlHTTP } = require('express-graphql'); // Used to intercept requests
 const { buildSchema } = require('graphql');
 const mongoose = require('mongoose');
-const env = require('./nodemon');
+const con = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@restapiwithmongo.spews.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
 
 // Models
 const Event = require('./models/event');
@@ -48,6 +48,7 @@ app.use('/graphql', graphqlHTTP({
             return ['Hello', 'Badminton']
         },
         createEvent: (args) => {
+            console.log(args)
             const event = new Event({
                 title: args.eventInput.title,
                 description: args.eventInput.description,
@@ -65,18 +66,13 @@ app.use('/graphql', graphqlHTTP({
                     console.log('Error creating event', e);
                     throw e;
                 });
-            const eventName = args.name;
-            return eventName;
         }
     },
     graphiql: true,
 }));
 
-mongoose.connect(`
-mongodb+srv://${env.MONGO_USER}:${env.MONGO_PASSWORD}@restapiwithmongo.spews.mongodb.net/${env.MONGO_DB}?retryWrites=true&w=majority
-`).then(() => {
-    app.listen(3000);
+mongoose.connect(con).then(() => {
+    app.listen(3000)
 }).catch(e => {
     console.log('Connection error', e)
 });
-
